@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block title %} Home {% endblock %}
+{% block content %}
+<style>
+    .home-hero {
+        min-height: 82vh;
+        background:
+            linear-gradient(rgba(17, 24, 39, 0.78), rgba(190, 24, 93, 0.65)),
+            url("https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1600&q=80");
+        background-position: center;
+        background-size: cover;
+        color: white;
+    }
+
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(10px);
+    }
+
+    .feature-card {
+        border: 0;
+        border-radius: 8px;
+        box-shadow: 0 18px 45px rgba(17, 24, 39, 0.12);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 22px 55px rgba(190, 24, 93, 0.2);
+    }
+
+    .icon-badge {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #be185d, #7c2d12);
+        color: white;
+    }
+</style>
+
+<section class="home-hero d-flex align-items-center">
+    <div class="container py-5">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <p class="text-uppercase fw-semibold mb-3" style="letter-spacing: 3px;">Welcome to beauty made simple</p>
+                <h1 class="display-3 fw-bold mb-4">Rembeka Beauty Shop</h1>
+                <p class="lead mb-4">
+                    Your trusted place for beauty products, organized stock, smooth sales tracking, and clear shop
+                    management. Everything your beauty business needs is kept neat, easy to reach, and ready for growth.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="/products" class="btn btn-light btn-lg rounded-pill px-4 fw-semibold">View Products</a>
+                    <a href="/sales" class="btn btn-outline-light btn-lg rounded-pill px-4 fw-semibold">Check Sales</a>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="glass-panel rounded-3 p-4 shadow-lg">
+                    <h2 class="h4 fw-bold mb-3">Shop Management</h2>
+                    <p class="mb-4">
+                        Manage products, stock purchases, sales, expenses, and categories from one beautiful system.
+                    </p>
+                    <div class="row g-3 text-center">
+                        <div class="col-6">
+                            <div class="bg-white bg-opacity-25 rounded-3 p-3">
+                                <div class="fs-3 fw-bold">Products</div>
+                                <small>Beauty items</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-white bg-opacity-25 rounded-3 p-3">
+                                <div class="fs-3 fw-bold">Sales</div>
+                                <small>Daily records</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-white bg-opacity-25 rounded-3 p-3">
+                                <div class="fs-3 fw-bold">Stock</div>
+                                <small>Purchases</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-white bg-opacity-25 rounded-3 p-3">
+                                <div class="fs-3 fw-bold">Costs</div>
+                                <small>Expenses</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <p class="text-danger fw-semibold text-uppercase mb-2">What Rembeka Helps You Do</p>
+            <h2 class="fw-bold">Run your beauty shop with confidence</h2>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card feature-card h-100 p-4">
+                    <div class="icon-badge rounded-circle d-flex align-items-center justify-content-center mb-3 fw-bold">P</div>
+                    <h3 class="h5 fw-bold">Organize Products</h3>
+                    <p class="text-muted mb-0">
+                        Keep your beauty products easy to find, grouped by category, and ready for customers.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card feature-card h-100 p-4">
+                    <div class="icon-badge rounded-circle d-flex align-items-center justify-content-center mb-3 fw-bold">S</div>
+                    <h3 class="h5 fw-bold">Track Sales</h3>
+                    <p class="text-muted mb-0">
+                        Follow your sales activity and understand how your shop is performing day by day.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card feature-card h-100 p-4">
+                    <div class="icon-badge rounded-circle d-flex align-items-center justify-content-center mb-3 fw-bold">E</div>
+                    <h3 class="h5 fw-bold">Control Expenses</h3>
+                    <p class="text-muted mb-0">
+                        Record business costs clearly so you can make better decisions for the shop.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
