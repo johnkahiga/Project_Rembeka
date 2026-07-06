@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %} Stock {% endblock %}
+{% block content %}
+
+<div>
+    <div>
+        <p>This is the categories page</p>
+    </div>
+    <div>.
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#categoriesModal">
+            Add Category
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="categoriesModal" tabindex="-1" aria-labelledby="categoriesModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="categoriesModalLabel">Adding Category</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <form action="/add_category" method="post">
+
+                                
+                                <div class="mb-3">
+                                    <label for="exampleInputPassword1" class="form-label">Category Name</label>
+                                    <input type="text" name="c_id" class="form-control" id="exampleInputPassword1">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="exampleInputPassword1" class="form-label">Description</label>
+                                    <input type="text" name="desc" class="form-control" id="exampleInputPassword1">
+                                </div>
+
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Add Category</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+    <div>
+        <table id="example" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Category ID</th>
+                    <th>Category Name</th>
+                    <th>Description</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in categories %}
+                <tr>
+                    <td>{{ i[0] }}</td>
+                    <td>{{ i[1] }}</td>
+                    <td> {{ i[2] }}</td>
+                   
+            
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+
+</div>
+
+
+{% endblock %}

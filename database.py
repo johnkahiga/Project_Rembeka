@@ -28,6 +28,23 @@ def get_categories():
     categories_data=cur.fetchall()
     return categories_data
 
+def get_users():
+    cur.execute('select * from users')
+    users_data=cur.fetchall()
+    return users_data
+
+
+def check_user_exists(email):
+    cur.execute("select * from users where username = %s",(email,))
+    user = cur.fetchone()
+    return user
+
+
+def create_user(user_details):
+    cur.execute("insert into users(full_name,username,password,user_type)values(%s,%s,%s,%s)",user_details)
+    conn.commit()
+
+
 
 def insert_categories(values):
     cur.execute("INSERT INTO categories( category_name,description) values(%s,%s)", values)
@@ -48,4 +65,13 @@ def insert_sales(values):
 def insert_expenses(values):
     cur.execute("INSERT INTO expenses( user_id, expense_name, amount, description) values(%s,%s,%s,%s)", values)
     conn.commit()
+
+def check_available_stock(product_id):
+    cur.execute("select sum(stock_purchases.quantity_added) from stock_purchases where pid = %s",(product_id,))
+    total_stock = cur.fetchone()[0] or 0
+
+    cur.execute("select sum(sales.quantity_sold) from sales where pid = %s",(product_id,))
+    total_sold = cur.fetchone()[0] or 0
+
+    return total_stock - total_sold
 

@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %} Stock {% endblock %}
+{% block content %}
+
+<div>
+    <div>
+        <p>This is the stock page</p>
+    </div>
+    <div>.
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#stockModal">
+            Add Stock
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="stockModal" tabindex="-1" aria-labelledby="stockModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="stockModalLabel">Adding Stock</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <form action="/add_stock" method="post">
+
+                                <div>
+                                    <select class="form-select" aria-label="Default select example" name="pid">
+                                        <option selected>Select a Product</option>
+                                        {% for product in products %}
+                                        <option value="{{ product[0] }}">{{ product[1] }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div>
+                                    <select class="form-select" aria-label="Default select example" name="uid">
+                                        <option selected>Select a User</option>
+                                        {% for user in users %}
+                                        <option value="{{ user[0] }}">{{ user[1] }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="exampleInputPassword1" class="form-label">Added Quantity</label>
+                                    <input type="number" name="quantity" class="form-control" id="exampleInputPassword1">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="exampleInputPassword1" class="form-label">Total Cost</label>
+                                    <input type="number" name="t_cost" class="form-control" id="exampleInputPassword1">
+                                </div>
+
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Add Stock</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+    <div>
+        <table id="example" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Product ID</th>
+                    <th>User ID</th>
+                    <th>Quantity Added</th>
+                    <th>Total Cost</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in stock %}
+                <tr>
+                    <td>{{ i[0] }}</td>
+                    <td>{{ i[1] }}</td>
+                    <td> {{ i[2] }}</td>
+                    <td> {{ i[3] }}</td>
+            
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+
+</div>
+
+
+{% endblock %}
