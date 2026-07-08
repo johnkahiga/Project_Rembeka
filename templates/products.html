@@ -1,103 +1,179 @@
 {% extends 'base.html' %}
 {% block title %} Products {% endblock %}
 {% block content %}
-<div>
-    <p>This is the products page</p>
-</div>
-<div>
-    <div>
-        <!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productsModal">
-            Add Product
-        </button>
+
+<style>
+    .products-page {
+        min-height: calc(100vh - 74px);
+        padding: 36px 18px;
+        background: linear-gradient(135deg, #fff7fb 0%, #ffffff 48%, #f0fdf4 100%);
+    }
+
+    .products-hero {
+        border-radius: 18px;
+        padding: 28px;
+        color: white;
+        background: linear-gradient(135deg, #111827 0%, #be185d 54%, #15803d 100%);
+        box-shadow: 0 18px 42px rgba(17, 24, 39, 0.18);
+    }
+
+    .products-icon {
+        width: 52px;
+        height: 52px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.18);
+        font-weight: 800;
+        font-size: 1.35rem;
+    }
+
+    .products-panel {
+        border: 0;
+        border-radius: 16px;
+        box-shadow: 0 16px 38px rgba(17, 24, 39, 0.1);
+        overflow: hidden;
+    }
+
+    .products-table thead th {
+        background: #111827;
+        color: white;
+        border: 0;
+        white-space: nowrap;
+    }
+
+    .products-table tbody td {
+        vertical-align: middle;
+    }
+
+    .products-action {
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 22px;
+        background: white;
+        color: #be185d;
+        font-weight: 700;
+        box-shadow: 0 12px 24px rgba(17, 24, 39, 0.18);
+    }
+
+    .products-modal .modal-content {
+        border: 0;
+        border-radius: 18px;
+        overflow: hidden;
+    }
+
+    .products-modal .modal-header {
+        color: white;
+        background: linear-gradient(135deg, #111827, #be185d);
+    }
+</style>
+
+<div class="products-page">
+    <div class="container-fluid">
+        <div class="products-hero mb-4 d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <span class="products-icon">P</span>
+                <div>
+                    <p class="text-uppercase small fw-bold opacity-75 mb-1">Inventory</p>
+                    <h1 class="h3 fw-bold mb-1">Products</h1>
+                    <p class="mb-0 opacity-75">Manage beauty shop products, pricing, and available quantity.</p>
+                </div>
+            </div>
+
+            <!-- Button trigger modal -->
+            <button type="button" class="btn products-action" data-bs-toggle="modal" data-bs-target="#productsModal">
+                Add Product
+            </button>
+        </div>
 
         <!-- Modal -->
-        <div class="modal fade" id="productsModal" tabindex="-1" aria-labelledby="productsModalLabel" aria-hidden="true">
+        <div class="modal fade products-modal" id="productsModal" tabindex="-1" aria-labelledby="productsModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h1 class="modal-title fs-5" id="productsModalLabel">Adding Product</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
-                        <div>
-                            <form action="/add_products" method="post">
-                                <div>
-                                    <select class="form-select" aria-label="Default select example" name="c_id">
-                                        <option selected>Select a Category</option>
-                                        {% for category in categories %}
-                                        <option value="{{ category[0] }}">{{ category[1] }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="exampleInputPassword1" class="form-label">Product Name</label>
-                                    <input type="number" name="p_name" class="form-control" id="exampleInputPassword1">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="exampleInputPassword1" class="form-label">Specification</label>
-                                    <input type="number" name="spec" class="form-control" id="exampleInputPassword1">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="exampleInputPassword1" class="form-label">Buying Price</label>
-                                    <input type="number" name="b_price" class="form-control" id="exampleInputPassword1">
-                                </div>
+                    <div class="modal-body p-4">
+                        <form action="/add_products" method="post">
+                            <div class="mb-3">
+                                <select class="form-select" aria-label="Default select example" name="c_id">
+                                    <option selected>Select a Category</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category[0] }}">{{ category[1] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleInputPassword1" class="form-label">Product Name</label>
+                                <input type="number" name="p_name" class="form-control" id="exampleInputPassword1">
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleInputPassword1" class="form-label">Specification</label>
+                                <input type="number" name="spec" class="form-control" id="exampleInputPassword1">
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleInputPassword1" class="form-label">Buying Price</label>
+                                <input type="number" name="b_price" class="form-control" id="exampleInputPassword1">
+                            </div>
 
-                                <div class="mb-3">
-                                    <label for="exampleInputPassword1" class="form-label">Selling Price</label>
-                                    <input type="number" name="s_price" class="form-control" id="exampleInputPassword1">
-                                </div>
-                                 <div class="mb-3">
-                                    <label for="exampleInputPassword1" class="form-label">Quantit Added</label>
-                                    <input type="number" name="q_added" class="form-control" id="exampleInputPassword1">
-                                </div>
+                            <div class="mb-3">
+                                <label for="exampleInputPassword1" class="form-label">Selling Price</label>
+                                <input type="number" name="s_price" class="form-control" id="exampleInputPassword1">
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleInputPassword1" class="form-label">Quantit Added</label>
+                                <input type="number" name="q_added" class="form-control" id="exampleInputPassword1">
+                            </div>
 
-
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-primary">Add Product</button>
-                                </div>
-                            </form>
-                        </div>
+                            <div class="modal-footer px-0 pb-0">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Add Product</button>
+                            </div>
+                        </form>
                     </div>
 
                 </div>
             </div>
         </div>
+
+        <div class="products-panel bg-white">
+            <div class="p-3 border-bottom d-flex align-items-center justify-content-between">
+                <h2 class="h5 fw-bold mb-0">Product List</h2>
+                <span class="badge text-bg-success rounded-pill">Live Records</span>
+            </div>
+            <div class="table-responsive">
+                <table id="example" class="table table-striped table-hover products-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Product ID</th>
+                            <th>Category ID</th>
+                            <th>Product Name</th>
+                            <th>Specification</th>
+                            <th>Buying Price</th>
+                            <th>Selling Price</th>
+                            <th>Quantity Added </th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in product_data %}
+                        <tr>
+                            <td>{{ i[0] }}</td>
+                            <td>{{ i[1] }}</td>
+                            <td> {{ i[2] }}</td>
+                            <td> {{ i[3] }}</td>
+                            <td> {{ i[4] }}</td>
+                            <td> {{ i[5] }}</td>
+                            <td> {{ i[6] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-
-
-    <div>
-        <table id="example" class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Product ID</th>
-                    <th>Category ID</th>
-                    <th>Product Name</th>
-                    <th>Specification</th>
-                    <th>Buying Price</th>
-                    <th>Selling Price</th>
-                    <th>Quantity Added </th>
-
-                </tr>
-            </thead>
-            <tbody>
-                {% for i in product_data %}
-                <tr>
-                    <td>{{ i[0] }}</td>
-                    <td>{{ i[1] }}</td>
-                    <td> {{ i[2] }}</td>
-                    <td> {{ i[3] }}</td>
-                    <td> {{ i[4] }}</td>
-                    <td> {{ i[5] }}</td>
-                    <td> {{ i[6] }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-</div>
 </div>
 
 {% endblock %}

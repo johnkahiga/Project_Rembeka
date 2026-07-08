@@ -2,36 +2,112 @@
 {% block title %} Register {% endblock %}
 {% block content %}
 
+<style>
+    .register-page {
+        min-height: calc(100vh - 74px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 16px;
+        background:
+            radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.22) 0 8%, transparent 9%),
+            radial-gradient(circle at 80% 72%, rgba(251, 191, 36, 0.18) 0 10%, transparent 11%),
+            linear-gradient(120deg, #111827 0%, #7c2d12 48%, #be185d 100%);
+        background-size: cover;
+        background-position: center;
+    }
 
-<div>
+    .register-shell {
+        width: min(100%, 920px);
+        display: grid;
+        grid-template-columns: 0.9fr 1.1fr;
+        overflow: hidden;
+        border-radius: 26px;
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 26px 70px rgba(0, 0, 0, 0.28);
+    }
 
-    <p>This is the register page</p>
+    .register-intro {
+        padding: 42px;
+        color: white;
+        background: linear-gradient(145deg, #111827 0%, #7c2d12 52%, #be185d 100%);
+    }
 
-    <div>
-        <form action="/register" method="post">
+    .register-mark {
+        width: 56px;
+        height: 56px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 18px;
+        background: white;
+        color: #be185d;
+        font-weight: 800;
+        font-size: 1.5rem;
+    }
+
+    .register-form {
+        padding: 42px;
+    }
+
+    .register-form .form-control {
+        min-height: 46px;
+        border-radius: 13px;
+        border: 1px solid #f3c4d6;
+        background: #fffafd;
+    }
+
+    .register-form .form-control:focus {
+        border-color: #be185d;
+        box-shadow: 0 0 0 0.2rem rgba(190, 24, 93, 0.14);
+    }
+
+    .register-submit {
+        min-height: 48px;
+        border: 0;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #111827, #be185d);
+        font-weight: 700;
+        box-shadow: 0 14px 26px rgba(17, 24, 39, 0.22);
+    }
+
+    @media (max-width: 768px) {
+        .register-shell {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="register-page">
+    <div class="register-shell">
+        <div class="register-intro">
+            <span class="register-mark">R</span>
+            <h1 class="h2 fw-bold mt-4 mb-3">Create Account</h1>
+            <p class="mb-0 opacity-75">Add a new user to the Rembeka Beauty Shop system.</p>
+        </div>
+
+        <form action="/register" method="post" class="register-form">
             <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Full Name</label>
-                <input type="text" name="full_name" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                <label for="registerFullName" class="form-label fw-semibold">Full Name</label>
+                <input type="text" name="full_name" class="form-control" id="registerFullName" aria-describedby="emailHelp" placeholder="Enter full name">
             </div>
             <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Email address</label>
-                <input type="email" name="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                <label for="registerEmail" class="form-label fw-semibold">Email address</label>
+                <input type="email" name="email" class="form-control" id="registerEmail" aria-describedby="emailHelp" placeholder="you@example.com">
             </div>
-           
+
             <div class="mb-3">
-                <label for="exampleInputPassword1" class="form-label">Password</label>
-                <input type="password" name="password" class="form-control" id="exampleInputPassword1">
+                <label for="registerPassword" class="form-label fw-semibold">Password</label>
+                <input type="password" name="password" class="form-control" id="registerPassword" placeholder="Create a password">
             </div>
               <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">User type</label>
-                <input type="text" name="type" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                <label for="registerType" class="form-label fw-semibold">User type</label>
+                <input type="text" name="type" class="form-control" id="registerType" aria-describedby="emailHelp" placeholder="Enter user type">
             </div>
-           
-            <button type="submit" class="btn btn-primary">Sign Up</button>
+
+            <button type="submit" class="btn btn-primary register-submit w-100 mt-2">Sign Up</button>
         </form>
-
     </div>
-
 </div>
 
 {% endblock %}

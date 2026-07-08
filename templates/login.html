@@ -1,27 +1,97 @@
 {% extends 'base.html' %}
 {% block title %} Login {% endblock %}
 {% block content %}
-<div>
-    <p>This is the login page</p>
+<style>
+    .auth-page {
+        min-height: calc(100vh - 74px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 16px;
+        background:
+            radial-gradient(circle at top left, rgba(190, 24, 93, 0.16), transparent 30%),
+            radial-gradient(circle at bottom right, rgba(124, 45, 18, 0.16), transparent 28%),
+            linear-gradient(135deg, #fff7fb 0%, #fff 48%, #fff7ed 100%);
+    }
 
-    <div>
-        <form action="/login" method="post">
-            
+    .auth-card {
+        width: min(100%, 430px);
+        overflow: hidden;
+        border: 0;
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 24px 60px rgba(17, 24, 39, 0.16);
+        backdrop-filter: blur(12px);
+    }
+
+    .auth-card-top {
+        padding: 34px 34px 28px;
+        color: white;
+        background: linear-gradient(135deg, #111827 0%, #7c2d12 45%, #be185d 100%);
+    }
+
+    .auth-badge {
+        width: 50px;
+        height: 50px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: white;
+        color: #be185d;
+        font-weight: 800;
+        font-size: 1.35rem;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .auth-form {
+        padding: 32px 34px 34px;
+    }
+
+    .auth-form .form-control {
+        min-height: 48px;
+        border-radius: 14px;
+        border: 1px solid #f3c4d6;
+        background: #fffafd;
+    }
+
+    .auth-form .form-control:focus {
+        border-color: #be185d;
+        box-shadow: 0 0 0 0.2rem rgba(190, 24, 93, 0.14);
+    }
+
+    .auth-submit {
+        min-height: 48px;
+        border: 0;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #be185d, #7c2d12);
+        font-weight: 700;
+        box-shadow: 0 14px 26px rgba(190, 24, 93, 0.25);
+    }
+</style>
+
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-card-top">
+            <span class="auth-badge">R</span>
+            <h1 class="h3 fw-bold mt-4 mb-2">Welcome Back</h1>
+            <p class="mb-0 opacity-75">Sign in to manage Rembeka Beauty Shop.</p>
+        </div>
+
+        <form action="/login" method="post" class="auth-form">
             <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Email address</label>
-                <input type="email" name="email" required  class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                <label for="loginEmail" class="form-label fw-semibold">Email address</label>
+                <input type="email" name="email" required class="form-control" id="loginEmail" aria-describedby="emailHelp" placeholder="you@example.com">
             </div>
-           
-            <div class="mb-3">
-                <label for="exampleInputPassword1" class="form-label">Password</label>
-                <input type="password" name="password"  required class="form-control" id="exampleInputPassword1">
+
+            <div class="mb-4">
+                <label for="loginPassword" class="form-label fw-semibold">Password</label>
+                <input type="password" name="password" required class="form-control" id="loginPassword" placeholder="Enter your password">
             </div>
-           
-            <button type="submit" class="btn btn-primary">Sign In</button>
+
+            <button type="submit" class="btn btn-primary auth-submit w-100">Sign In</button>
         </form>
-
     </div>
-
 </div>
 
 {% endblock %}

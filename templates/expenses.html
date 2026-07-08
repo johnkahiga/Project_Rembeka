@@ -2,98 +2,160 @@
 {% block title %} Stock {% endblock %}
 {% block content %}
 
-<div>
-    <div>
-        <p>This is the categories page</p>
-    </div>
-    <div>.
-        <!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#expensesModal">
-            Add Expense
-        </button>
+<style>
+    .expenses-page {
+        min-height: calc(100vh - 74px);
+        padding: 36px 18px;
+        background: linear-gradient(135deg, #fff7ed 0%, #ffffff 48%, #fef2f2 100%);
+    }
+
+    .expenses-hero {
+        border-radius: 18px;
+        padding: 28px;
+        color: white;
+        background: linear-gradient(135deg, #7c2d12 0%, #dc2626 52%, #be185d 100%);
+        box-shadow: 0 18px 42px rgba(124, 45, 18, 0.18);
+    }
+
+    .expenses-icon {
+        width: 52px;
+        height: 52px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.18);
+        font-weight: 800;
+        font-size: 1.35rem;
+    }
+
+    .expenses-action {
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 24px;
+        background: white;
+        color: #dc2626;
+        font-weight: 700;
+        box-shadow: 0 12px 24px rgba(17, 24, 39, 0.18);
+    }
+
+    .expenses-panel {
+        border: 0;
+        border-radius: 16px;
+        box-shadow: 0 16px 38px rgba(17, 24, 39, 0.1);
+        overflow: hidden;
+    }
+
+    .expenses-table thead th {
+        background: #7c2d12;
+        color: white;
+        border: 0;
+        white-space: nowrap;
+    }
+
+    .expenses-modal .modal-content {
+        border: 0;
+        border-radius: 18px;
+        overflow: hidden;
+    }
+
+    .expenses-modal .modal-header {
+        color: white;
+        background: linear-gradient(135deg, #7c2d12, #dc2626);
+    }
+</style>
+
+<div class="expenses-page">
+    <div class="container-fluid">
+        <div class="expenses-hero mb-4 d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <span class="expenses-icon">E</span>
+                <div>
+                    <p class="text-uppercase small fw-bold opacity-75 mb-1">Spending</p>
+                    <h1 class="h3 fw-bold mb-1">Expenses</h1>
+                    <p class="mb-0 opacity-75">Capture shop costs and keep daily spending easy to review.</p>
+                </div>
+            </div>
+
+            <!-- Button trigger modal -->
+            <button type="button" class="btn expenses-action" data-bs-toggle="modal" data-bs-target="#expensesModal">
+                Add Expense
+            </button>
+        </div>
 
         <!-- Modal -->
-        <div class="modal fade" id="expensesModal" tabindex="-1" aria-labelledby="expensesModalLabel" aria-hidden="true">
+        <div class="modal fade expenses-modal" id="expensesModal" tabindex="-1" aria-labelledby="expensesModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h1 class="modal-title fs-5" id="expensesModalLabel">Adding Expense</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
-                        <div>
-                            <form action="/add_exepense" method="post">
-                                <div>
-                                    <select class="form-select" aria-label="Default select example" name="uid">
-                                        <option selected>Select a User</option>
-                                        {% for user in users %}
-                                        <option value="{{ user[0] }}">{{ user[1] }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="exampleInputPassword1" class="form-label">Expense  Name</label>
-                                    <input type="text" name="expense" class="form-control" id="exampleInputPassword1">
-                                </div>
-                                 <div class="mb-3">
-                                    <label for="exampleInputPassword1" class="form-label">Amount</label>
-                                    <input type="number" name="amount" class="form-control" id="exampleInputPassword1">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="exampleInputPassword1" class="form-label">Description</label>
-                                    <input type="text" name="desc" class="form-control" id="exampleInputPassword1">
-                                </div>
+                    <div class="modal-body p-4">
+                        <form action="/add_exepense" method="post">
+                            <div class="mb-3">
+                                <select class="form-select" aria-label="Default select example" name="uid">
+                                    <option selected>Select a User</option>
+                                    {% for user in users %}
+                                    <option value="{{ user[0] }}">{{ user[1] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleInputPassword1" class="form-label">Expense  Name</label>
+                                <input type="text" name="expense" class="form-control" id="exampleInputPassword1">
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleInputPassword1" class="form-label">Amount</label>
+                                <input type="number" name="amount" class="form-control" id="exampleInputPassword1">
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleInputPassword1" class="form-label">Description</label>
+                                <input type="text" name="desc" class="form-control" id="exampleInputPassword1">
+                            </div>
 
-
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-primary">Add Expense</button>
-                                </div>
-                            </form>
-                        </div>
+                            <div class="modal-footer px-0 pb-0">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Add Expense</button>
+                            </div>
+                        </form>
                     </div>
 
                 </div>
             </div>
         </div>
+
+        <div class="expenses-panel bg-white">
+            <div class="p-3 border-bottom d-flex align-items-center justify-content-between">
+                <h2 class="h5 fw-bold mb-0">Expense Records</h2>
+                <span class="badge text-bg-danger rounded-pill">Costs</span>
+            </div>
+            <div class="table-responsive">
+                <table id="example" class="table table-striped table-hover expenses-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>User  ID</th>
+                            <th>Expense Name</th>
+                            <th>Amount</th>
+                            <th>Description</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in expenses %}
+                        <tr>
+                            <td>{{ i[0] }}</td>
+                            <td>{{ i[1] }}</td>
+                            <td> {{ i[2] }}</td>
+                            <td> {{ i[3] }}</td>
+
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-
-
-
-
-
-
-
-    <div>
-        <table id="example" class="table table-striped">
-            <thead>
-                <tr>
-                    <th>User  ID</th>
-                    <th>Expense Name</th>
-                    <th>Amount</th>
-                    <th>Description</th>
-
-                </tr>
-            </thead>
-            <tbody>
-                {% for i in expenses %}
-                <tr>
-                    <td>{{ i[0] }}</td>
-                    <td>{{ i[1] }}</td>
-                    <td> {{ i[2] }}</td>
-                     <td> {{ i[3] }}</td>
-
-
-
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-
-
 </div>
-
 
 {% endblock %}

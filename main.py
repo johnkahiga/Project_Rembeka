@@ -1,6 +1,5 @@
 from flask import Flask, render_template,request,redirect,url_for,flash,session
-from database import get_products,get_categories,get_expenses,get_sales,get_users,get_stock_purchases,insert_products,insert_sales,insert_categories,insert_expenses,insert_stock_purchases,check_available_stock,check_user_exists,create_user
-
+from database import get_products,get_categories,get_expenses,get_sales,get_users,get_stock_purchases,insert_products,insert_sales,insert_categories,insert_expenses,insert_stock_purchases,check_available_stock,check_user_exists,create_user,get_daily_sales_summary,get_monthly_sales_summary,get_active_users,get_best_selling_products,get_category_profit_analysis,get_category_sales_analysis,get_out_of_stock_products,get_products_sold_below_buying_price,get_profit_margin_per_product,get_profit_per_day,get_profit_per_month,get_profit_per_product,get_profit_per_year,get_sales_by_attendant,get_sales_by_product,get_slow_moving_products,get_stock_movement_report,get_todays_sales,get_total_stock_value,get_yearly_sales_summary
 from flask_bcrypt import Bcrypt
 from functools import wraps 
 
@@ -190,7 +189,32 @@ def login():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template("dashboard.html")
+    active_users=get_active_users()
+    p_below_buying_price=get_products_sold_below_buying_price()
+    stock_movement_report=get_stock_movement_report()
+    sales_by_attendant=get_sales_by_attendant()
+    category_profit=get_category_profit_analysis()
+    category_sales=get_category_sales_analysis()
+    profit_margin_per_p=get_profit_margin_per_product()
+    out_of_stock_products=get_out_of_stock_products()
+    total_stock_value=get_total_stock_value()
+    todays_sales=get_todays_sales()
+    daily_sales_summary=get_daily_sales_summary()
+    monthly_sales_summary=get_monthly_sales_summary()
+    yearly_sales_summary=get_yearly_sales_summary()
+    profit_per_day=get_profit_per_day()
+    profit_per_month=get_profit_per_month()
+    profit_per_year=get_profit_per_year()
+    sales_by_product=get_sales_by_product()
+    best_selling_product=get_best_selling_products()
+    slow_moving_products=get_slow_moving_products()
+    profit_per_product=get_profit_per_product()
+    return render_template("dashboard.html",active_users=active_users, p_below_buying_price= p_below_buying_price,stock_movement_report=stock_movement_report,
+                          sales_by_attendant=sales_by_attendant, category_profit=category_profit,category_sales=category_sales,profit_margin_per_p=profit_margin_per_p,
+                            out_of_stock_products=  out_of_stock_products, total_stock_value= total_stock_value, todays_sales= todays_sales,daily_sales_summary=daily_sales_summary
+                            ,  monthly_sales_summary=  monthly_sales_summary, yearly_sales_summary= yearly_sales_summary,profit_per_day=profit_per_day,
+                              profit_per_month= profit_per_month, profit_per_year= profit_per_year,   sales_by_product=  sales_by_product,best_selling_product=best_selling_product,
+                              slow_moving_products=slow_moving_products,profit_per_product=profit_per_product)
 
 
 @app.route('/logout')
