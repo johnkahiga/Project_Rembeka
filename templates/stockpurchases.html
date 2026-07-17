@@ -102,14 +102,7 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="mb-3">
-                                <select class="form-select" aria-label="Default select example" name="uid">
-                                    <option selected>Select a User</option>
-                                    {% for user in users %}
-                                    <option value="{{ user[0] }}">{{ user[1] }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
+                           
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Added Quantity</label>
                                 <input type="number" name="quantity" class="form-control" id="exampleInputPassword1">

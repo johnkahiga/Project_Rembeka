@@ -51,7 +51,7 @@ def insert_categories(values):
     conn.commit()
 
 def insert_products(values):
-    cur.execute("INSERT INTO products(category_id, product_name, specification, buying_price, selling_price, stock_quantity, reorder_level, status ) values(%s,%s,%s,%s,%s,%s,%s,%s)", values)
+    cur.execute("INSERT INTO products(category_id, product_name, specification, buying_price, selling_price, stock_quantity) values(%s,%s,%s,%s,%s,%s)", values)
     conn.commit()
 
 def insert_stock_purchases(values):
@@ -67,100 +67,99 @@ def insert_expenses(values):
     conn.commit()
 
 def check_available_stock(product_id):
-    cur.execute("select sum(stock_purchases.quantity_added) from stock_purchases where pid = %s",(product_id,))
+    cur.execute("select sum(stock_purchases.quantity_added) from stock_purchases where product_id = %s",(product_id,))
     total_stock = cur.fetchone()[0] or 0
 
-    cur.execute("select sum(sales.quantity_sold) from sales where pid = %s",(product_id,))
+    cur.execute("select sum(sales.quantity_sold) from sales where product_id = %s",(product_id,))
     total_sold = cur.fetchone()[0] or 0
 
     return total_stock - total_sold
 
 
-def get_active_users(cur):
-    cur.execute("""
-        SELECT 
-            user_id,
-            full_name,
-            username,
-            role,
-            status
-        FROM users
-        WHERE status = 'Active'
-        ORDER BY full_name
-    """)
-    get_active_users=cur.fetchall()
-    return get_active_users
+# def get_active_users():
+#     cur.execute("""
+#         SELECT 
+#             user_id,
+#             full_name,
+#             username,
+#             status
+#         FROM users
+#         WHERE status = 'Active'
+#         ORDER BY full_name
+#     """)
+#     get_active_users=cur.fetchall()
+#     return get_active_users
 
-def get_products_sold_below_buying_price(cur):
+def get_products_sold_below_buying_price():
     cur.execute("""
         SELECT 
             s.sale_id,
-            p.pid,
+            p.product_id,
             p.product_name,
             p.specification,
-            s.quantity,
+            s.quantity_sold,
             p.buying_price,
             s.selling_price_at_sale,
             s.sale_date
         FROM sales s
-        JOIN products p ON s.pid = p.pid
+        JOIN products p ON s.product_id = p.product_id
         WHERE s.selling_price_at_sale < p.buying_price
         ORDER BY s.sale_date DESC
     """)
     below_buying_price= cur.fetchall()
     return below_buying_price
 
-def get_stock_movement_report(cur):
+def get_stock_movement_report():
     cur.execute("""
         SELECT 
             p.product_name,
             'Stock In' AS movement_type,
-            st.stock_quantity AS quantity,
-            st.date_added AS movement_date
-        FROM stock st
-        JOIN products p ON st.pid = p.pid
+            st.quantity_added AS quantity,
+            st.purchase_date AS movement_date
+        FROM stock_purchases st
+        JOIN products p ON st.product_id = p.product_id
 
         UNION ALL
 
         SELECT 
             p.product_name,
             'Stock Out' AS movement_type,
-            s.quantity AS quantity,
+            s.quantity_sold AS quantity,
             s.sale_date AS movement_date
         FROM sales s
-        JOIN products p ON s.pid = p.pid
+        JOIN products p ON s.product_id = p.product_id
 
         ORDER BY movement_date DESC
     """)
     movement_report=cur.fetchall()
     return movement_report
 
-def get_sales_by_attendant(cur):
+def get_sales_by_attendant():
     cur.execute("""
         SELECT 
             u.user_id,
             u.full_name,
-            u.role,
-            SUM(s.quantity) AS total_items_sold,
-            SUM(s.quantity * s.selling_price_at_sale) AS total_sales
+            u.user_type,
+            SUM(s.quantity_sold) AS total_items_sold,
+            SUM(s.quantity_sold * s.selling_price_at_sale) AS total_sales
         FROM sales s
-        JOIN users u ON s.sold_by = u.user_id
-        GROUP BY u.user_id, u.full_name, u.role
+        JOIN users u ON s.user_id = u.user_id
+        GROUP BY u.user_id, u.full_name, u.user_type
         ORDER BY total_sales DESC
     """)
     sales_by_attendant=cur.fetchall()
     return sales_by_attendant
 
-def get_category_profit_analysis(cur):
+def get_category_profit_analysis():
     cur.execute("""
         SELECT 
             c.category_id,
             c.category_name,
-            SUM(s.quantity * s.selling_price_at_sale) AS total_sales,
-            SUM(s.quantity * p.buying_price) AS total_cost,
-            SUM((s.quantity * s.selling_price_at_sale) - (s.quantity * p.buying_price)) AS category_profit
+            SUM(s.quantity_sold * s.selling_price_at_sale) AS total_sales,
+            SUM(s.quantity_sold * p.buying_price) AS total_cost,
+            SUM((s.quantity_sold * s.selling_price_at_sale) - (s.quantity_sold * p.buying_price)) AS category_profit
         FROM sales s
-        JOIN products p ON s.pid = p.pid
+        JOIN products p ON s.product_id = p.product_id
         JOIN categories c ON p.category_id = c.category_id
         GROUP BY c.category_id, c.category_name
         ORDER BY category_profit DESC
@@ -168,15 +167,15 @@ def get_category_profit_analysis(cur):
     category_profit=cur.fetchall()
     return  category_profit
 
-def get_category_sales_analysis(cur):
+def get_category_sales_analysis():
     cur.execute("""
         SELECT 
             c.category_id,
             c.category_name,
-            SUM(s.quantity) AS total_quantity_sold,
-            SUM(s.quantity * s.selling_price_at_sale) AS total_sales
+            SUM(s.quantity_sold) AS total_quantity_sold,
+            SUM(s.quantity_sold * s.selling_price_at_sale) AS total_sales
         FROM sales s
-        JOIN products p ON s.pid = p.pid
+        JOIN products p ON s.product_id = p.product_id
         JOIN categories c ON p.category_id = c.category_id
         GROUP BY c.category_id, c.category_name
         ORDER BY total_sales DESC
@@ -184,10 +183,10 @@ def get_category_sales_analysis(cur):
     category_sales=cur.fetchall()
     return category_sales
 
-def get_profit_margin_per_product(cur):
+def get_profit_margin_per_product():
     cur.execute("""
         SELECT 
-            pid,
+            product_id,
             product_name,
             specification,
             buying_price,
@@ -201,24 +200,24 @@ def get_profit_margin_per_product(cur):
     profit_margin=cur.fetchall()
     return profit_margin
 
-def get_out_of_stock_products(cur):
+def get_out_of_stock_products():
     cur.execute("""
         SELECT 
-            p.pid,
+            p.product_id,
             p.product_name,
             p.specification,
             COALESCE(st.total_stock_added, 0) - COALESCE(sa.total_sold, 0) AS available_stock
         FROM products p
         LEFT JOIN (
-            SELECT pid, SUM(stock_quantity) AS total_stock_added
-            FROM stock
-            GROUP BY pid
-        ) st ON p.pid = st.pid
+            SELECT product_id, SUM(quantity_added) AS total_stock_added
+            FROM stock_purchases
+            GROUP BY product_id
+        ) st ON p.product_id = st.product_id
         LEFT JOIN (
-            SELECT pid, SUM(quantity) AS total_sold
+            SELECT product_id, SUM(quantity_sold) AS total_sold
             FROM sales
-            GROUP BY pid
-        ) sa ON p.pid = sa.pid
+            GROUP BY product_id
+        ) sa ON p.product_id = sa.product_id
         WHERE COALESCE(st.total_stock_added, 0) - COALESCE(sa.total_sold, 0) <= 0
         ORDER BY p.product_name
     """)
@@ -226,49 +225,49 @@ def get_out_of_stock_products(cur):
 
 
 
-def get_total_stock_value(cur):
+def get_total_stock_value():
     cur.execute("""
         SELECT 
             COALESCE(SUM(available_stock * buying_price), 0) AS total_stock_value
         FROM (
             SELECT 
-                p.pid,
+                p.product_id,
                 p.buying_price,
                 COALESCE(st.total_stock_added, 0) - COALESCE(sa.total_sold, 0) AS available_stock
             FROM products p
             LEFT JOIN (
-                SELECT pid, SUM(stock_quantity) AS total_stock_added
-                FROM stock
-                GROUP BY pid
-            ) st ON p.pid = st.pid
+                SELECT product_id, SUM(quantity_added) AS total_stock_added
+                FROM stock_purchases
+                GROUP BY product_id
+            ) st ON p.product_id = st.product_id
             LEFT JOIN (
-                SELECT pid, SUM(quantity) AS total_sold
+                SELECT product_id, SUM(quantity_sold) AS total_sold
                 FROM sales
-                GROUP BY pid
-            ) sa ON p.pid = sa.pid
+                GROUP BY product_id
+            ) sa ON p.product_id = sa.product_id
         ) stock_balance
     """)
     return cur.fetchone()[0]
 
 
 
-def get_todays_sales(cur):
+def get_todays_sales():
     cur.execute("""
         SELECT 
-            COALESCE(SUM(quantity * selling_price_at_sale), 0) AS todays_sales
+            COALESCE(SUM(quantity_sold * selling_price_at_sale), 0) AS todays_sales
         FROM sales
-        WHERE DATE(sale_date) = CURDATE()
+        WHERE DATE(sale_date) = CURRENT_DATE
     """)
     return cur.fetchone()[0]
 
 
 
-def get_daily_sales_summary(cur):
+def get_daily_sales_summary():
     cur.execute("""
         SELECT 
             DATE(sale_date) AS sale_day,
-            SUM(quantity) AS total_items_sold,
-            SUM(quantity * selling_price_at_sale) AS total_sales
+            SUM(quantity_sold) AS total_items_sold,
+            SUM(quantity_sold * selling_price_at_sale) AS total_sales
         FROM sales
         GROUP BY DATE(sale_date)
         ORDER BY sale_day DESC
@@ -278,15 +277,15 @@ def get_daily_sales_summary(cur):
 
 
 
-def get_monthly_sales_summary(cur):
+def get_monthly_sales_summary():
     cur.execute("""
         SELECT 
-            YEAR(sale_date) AS sale_year,
-            MONTH(sale_date) AS sale_month,
-            SUM(quantity) AS total_items_sold,
-            SUM(quantity * selling_price_at_sale) AS total_sales
+            EXTRACT(YEAR FROM sale_date) AS sale_year,
+            EXTRACT(MONTH FROM sale_date) AS sale_month,
+            SUM(quantity_sold) AS total_items_sold,
+            SUM(quantity_sold * selling_price_at_sale) AS total_sales
         FROM sales
-        GROUP BY YEAR(sale_date), MONTH(sale_date)
+        GROUP BY EXTRACT(YEAR FROM sale_date), EXTRACT(MONTH FROM sale_date)
         ORDER BY sale_year DESC, sale_month DESC
     """)
     monthly_sales_summary=cur.fetchall()
@@ -294,14 +293,14 @@ def get_monthly_sales_summary(cur):
 
 
 
-def get_yearly_sales_summary(cur):
+def get_yearly_sales_summary():
     cur.execute("""
         SELECT 
-            YEAR(sale_date) AS sale_year,
-            SUM(quantity) AS total_items_sold,
-            SUM(quantity * selling_price_at_sale) AS total_sales
+            EXTRACT(YEAR FROM sale_date) AS sale_year,
+            SUM(quantity_sold) AS total_items_sold,
+            SUM(quantity_sold * selling_price_at_sale) AS total_sales
         FROM sales
-        GROUP BY YEAR(sale_date)
+        GROUP BY EXTRACT(YEAR FROM sale_date)
         ORDER BY sale_year DESC
     """)
     yearly_sales_summary=cur.fetchall()
@@ -309,15 +308,15 @@ def get_yearly_sales_summary(cur):
 
 
 
-def get_profit_per_day(cur):
+def get_profit_per_day():
     cur.execute("""
         SELECT 
             DATE(s.sale_date) AS sale_day,
-            SUM(s.quantity * s.selling_price_at_sale) AS total_sales,
-            SUM(s.quantity * p.buying_price) AS total_cost,
-            SUM((s.quantity * s.selling_price_at_sale) - (s.quantity * p.buying_price)) AS daily_profit
+            SUM(s.quantity_sold * s.selling_price_at_sale) AS total_sales,
+            SUM(s.quantity_sold * p.buying_price) AS total_cost,
+            SUM((s.quantity_sold * s.selling_price_at_sale) - (s.quantity_sold * p.buying_price)) AS daily_profit
         FROM sales s
-        JOIN products p ON s.pid = p.pid
+        JOIN products p ON s.product_id = p.product_id
         GROUP BY DATE(s.sale_date)
         ORDER BY sale_day DESC
     """)
@@ -326,17 +325,17 @@ def get_profit_per_day(cur):
 
 
 
-def get_profit_per_month(cur):
+def get_profit_per_month():
     cur.execute("""
         SELECT 
-            YEAR(s.sale_date) AS sale_year,
-            MONTH(s.sale_date) AS sale_month,
-            SUM(s.quantity * s.selling_price_at_sale) AS total_sales,
-            SUM(s.quantity * p.buying_price) AS total_cost,
-            SUM((s.quantity * s.selling_price_at_sale) - (s.quantity * p.buying_price)) AS monthly_profit
+            EXTRACT(YEAR FROM s.sale_date) AS sale_year,
+            EXTRACT(MONTH FROM s.sale_date) AS sale_month,
+            SUM(s.quantity_sold * s.selling_price_at_sale) AS total_sales,
+            SUM(s.quantity_sold * p.buying_price) AS total_cost,
+            SUM((s.quantity_sold * s.selling_price_at_sale) - (s.quantity_sold * p.buying_price)) AS monthly_profit
         FROM sales s
-        JOIN products p ON s.pid = p.pid
-        GROUP BY YEAR(s.sale_date), MONTH(s.sale_date)
+        JOIN products p ON s.product_id = p.product_id
+        GROUP BY EXTRACT(YEAR FROM s.sale_date), EXTRACT(MONTH FROM s.sale_date)
         ORDER BY sale_year DESC, sale_month DESC
     """)
     profit_per_month=cur.fetchall()
@@ -344,16 +343,16 @@ def get_profit_per_month(cur):
 
 
 
-def get_profit_per_year(cur):
+def get_profit_per_year():
     cur.execute("""
         SELECT 
-            YEAR(s.sale_date) AS sale_year,
-            SUM(s.quantity * s.selling_price_at_sale) AS total_sales,
-            SUM(s.quantity * p.buying_price) AS total_cost,
-            SUM((s.quantity * s.selling_price_at_sale) - (s.quantity * p.buying_price)) AS yearly_profit
+            EXTRACT(YEAR FROM s.sale_date) AS sale_year,
+            SUM(s.quantity_sold * s.selling_price_at_sale) AS total_sales,
+            SUM(s.quantity_sold * p.buying_price) AS total_cost,
+            SUM((s.quantity_sold * s.selling_price_at_sale) - (s.quantity_sold * p.buying_price)) AS yearly_profit
         FROM sales s
-        JOIN products p ON s.pid = p.pid
-        GROUP BY YEAR(s.sale_date)
+        JOIN products p ON s.product_id = p.product_id
+        GROUP BY EXTRACT(YEAR FROM s.sale_date)
         ORDER BY sale_year DESC
     """)
     profit_per_year=cur.fetchall()
@@ -361,33 +360,33 @@ def get_profit_per_year(cur):
 
 
 
-def get_sales_by_product(cur):
+def get_sales_by_product():
     cur.execute("""
         SELECT 
-            p.pid,
+            p.product_id,
             p.product_name,
             p.specification,
-            SUM(s.quantity) AS total_quantity_sold,
-            SUM(s.quantity * s.selling_price_at_sale) AS total_sales
+            SUM(s.quantity_sold) AS total_quantity_sold,
+            SUM(s.quantity_sold * s.selling_price_at_sale) AS total_sales
         FROM sales s
-        JOIN products p ON s.pid = p.pid
-        GROUP BY p.pid, p.product_name, p.specification
+        JOIN products p ON s.product_id = p.product_id
+        GROUP BY p.product_id, p.product_name, p.specification
         ORDER BY total_sales DESC
     """)
     sales_by_product=cur.fetchall()
     return sales_by_product
 
 
-def get_best_selling_products(cur, limit=10):
+def get_best_selling_products(limit=10):
     cur.execute("""
         SELECT 
-            p.pid,
+            p.product_id,
             p.product_name,
             p.specification,
-            SUM(s.quantity) AS total_quantity_sold
+            SUM(s.quantity_sold) AS total_quantity_sold
         FROM sales s
-        JOIN products p ON s.pid = p.pid
-        GROUP BY p.pid, p.product_name, p.specification
+        JOIN products p ON s.product_id = p.product_id
+        GROUP BY p.product_id, p.product_name, p.specification
         ORDER BY total_quantity_sold DESC
         LIMIT %s
     """, (limit,))
@@ -396,35 +395,35 @@ def get_best_selling_products(cur, limit=10):
 
 
 
-def get_slow_moving_products(cur, limit=10):
+def get_slow_moving_products(limit=10):
     cur.execute("""
         SELECT 
-            p.pid,
+            p.product_id,
             p.product_name,
             p.specification,
-            COALESCE(SUM(s.quantity), 0) AS total_quantity_sold
+            COALESCE(SUM(s.quantity_sold), 0) AS total_quantity_sold
         FROM products p
-        LEFT JOIN sales s ON p.pid = s.pid
-        GROUP BY p.pid, p.product_name, p.specification
+        LEFT JOIN sales s ON p.product_id = s.product_id
+        GROUP BY p.product_id, p.product_name, p.specification
         ORDER BY total_quantity_sold ASC
         LIMIT %s
     """, (limit,))
     slow_moving=cur.fetchall()
     return slow_moving
 
-def get_profit_per_product(cur):
+def get_profit_per_product():
     cur.execute("""
         SELECT 
-            p.pid,
+            p.product_id,
             p.product_name,
             p.specification,
-            SUM(s.quantity) AS total_quantity_sold,
-            SUM(s.quantity * s.selling_price_at_sale) AS total_sales,
-            SUM(s.quantity * p.buying_price) AS total_cost,
-            SUM((s.quantity * s.selling_price_at_sale) - (s.quantity * p.buying_price)) AS gross_profit
+            SUM(s.quantity_sold) AS total_quantity_sold,
+            SUM(s.quantity_sold * s.selling_price_at_sale) AS total_sales,
+            SUM(s.quantity_sold * p.buying_price) AS total_cost,
+            SUM((s.quantity_sold * s.selling_price_at_sale) - (s.quantity_sold * p.buying_price)) AS gross_profit
         FROM sales s
-        JOIN products p ON s.pid = p.pid
-        GROUP BY p.pid, p.product_name, p.specification
+        JOIN products p ON s.product_id = p.product_id
+        GROUP BY p.product_id, p.product_name, p.specification
         ORDER BY gross_profit DESC
     """)
     profit_per_product=cur.fetchall()

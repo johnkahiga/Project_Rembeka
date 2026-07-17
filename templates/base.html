@@ -27,11 +27,11 @@
 
             <div class="collapse navbar-collapse" id="mainNavbar">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center gap-lg-1">
-                    {% if session.email %}
+                   
                     <li class="nav-item">
                         <a class="nav-link px-3 rounded-pill text-white" href="/">Home</a>
                     </li>
-                    
+                     {% if session.email %}
                     <li class="nav-item">
                         <a class="nav-link px-3 rounded-pill text-white" href="/products">Products</a>
                     </li>
@@ -117,6 +117,28 @@
 
 
 
+
+    <footer class="text-white mt-5 py-4" style="background: linear-gradient(135deg, #111827 0%, #7c2d12 45%, #be185d 100%);">
+        <div class="container">
+            <div class="row align-items-center g-3">
+                <div class="col-md-4 text-center text-md-start">
+                    <p class="mb-0">&copy; 2026 Rembeka Beauty Shop. All rights reserved.</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <a class="text-white text-decoration-none me-3" href="/">Home</a>
+                    {% if session.email %}
+                    <a class="text-white text-decoration-none me-3" href="/products">Products</a>
+                    <a class="text-white text-decoration-none me-3" href="/sales">Sales</a>
+                    <a class="text-white text-decoration-none" href="/dashboard">Dashboard</a>
+                    {% endif %}
+                </div>
+                <div class="col-md-4 text-center text-md-end">
+                    <a class="text-white text-decoration-none" href="mailto:info@rembekabeautyshop.com">info@rembekabeautyshop.com</a>
+                    <span class="d-block">Tel: +254 700 000 000</span>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"

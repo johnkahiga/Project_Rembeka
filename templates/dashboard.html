@@ -1,0 +1,766 @@
+{% extends 'base.html' %}
+{% block title %} Dashboard {% endblock %}
+{% block content %}
+
+{% set total_sales = namespace(value=0) %}
+{% for item in daily_sales_summary %}
+    {% set total_sales.value = total_sales.value + (item[2] | float) %}
+{% endfor %}
+{% set total_profit = namespace(value=0) %}
+{% for item in profit_per_day %}
+    {% set total_profit.value = total_profit.value + (item[3] | float) %}
+{% endfor %}
+{% set total_items = namespace(value=0) %}
+{% for item in daily_sales_summary %}
+    {% set total_items.value = total_items.value + (item[1] | float) %}
+{% endfor %}
+
+<style>
+    .dashboard-page {
+        min-height: calc(100vh - 74px);
+        padding: 34px 18px 48px;
+        background:
+            radial-gradient(circle at top left, rgba(244, 114, 182, 0.22), transparent 32%),
+            linear-gradient(135deg, #fff7ed 0%, #fff1f2 44%, #eef2ff 100%);
+        color: #172033;
+    }
+
+    .dashboard-shell {
+        max-width: 1480px;
+        margin: 0 auto;
+    }
+
+    .dashboard-hero {
+        overflow: hidden;
+        position: relative;
+        border-radius: 18px;
+        padding: 30px;
+        color: #fff;
+        background: linear-gradient(135deg, #831843 0%, #be185d 48%, #3730a3 100%);
+        box-shadow: 0 22px 50px rgba(131, 24, 67, 0.22);
+    }
+
+    .dashboard-hero::after {
+        content: "";
+        position: absolute;
+        inset: auto -60px -130px auto;
+        width: 320px;
+        height: 320px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .hero-badge,
+    .metric-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.16);
+        padding: 8px 13px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+    }
+
+    .dashboard-card,
+    .chart-card,
+    .data-card {
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.88);
+        box-shadow: 0 18px 42px rgba(15, 23, 42, 0.09);
+    }
+
+    .dashboard-card {
+        padding: 20px;
+        height: 100%;
+    }
+
+    .card-icon {
+        width: 44px;
+        height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        color: #fff;
+        font-weight: 800;
+        background: linear-gradient(135deg, #be185d, #4f46e5);
+    }
+
+    .metric-value {
+        font-size: clamp(1.5rem, 3vw, 2.25rem);
+        font-weight: 800;
+        color: #111827;
+        line-height: 1.05;
+    }
+
+    .metric-label {
+        color: #64748b;
+        font-weight: 700;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .chart-card,
+    .data-card {
+        overflow: hidden;
+    }
+
+    .section-head {
+        padding: 18px 20px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .section-title {
+        margin: 0;
+        color: #111827;
+        font-size: 1rem;
+        font-weight: 800;
+    }
+
+    .chart-wrap {
+        height: 320px;
+        padding: 18px;
+    }
+
+    .chart-wrap.sm {
+        height: 280px;
+    }
+
+    .insight-list {
+        display: grid;
+        gap: 12px;
+        padding: 18px;
+    }
+
+    .insight-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 14px;
+        border-radius: 12px;
+        background: #f8fafc;
+        border: 1px solid #eef2f7;
+    }
+
+    .table-modern {
+        margin: 0;
+    }
+
+    .table-modern thead th {
+        background: #831843;
+        color: white;
+        border: 0;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+    }
+
+    .table-modern tbody td {
+        vertical-align: middle;
+        color: #334155;
+        border-color: #edf2f7;
+        white-space: nowrap;
+    }
+
+    .status-pill {
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-weight: 800;
+        font-size: 0.75rem;
+    }
+
+    .pill-good {
+        color: #047857;
+        background: #d1fae5;
+    }
+
+    .pill-warn {
+        color: #b45309;
+        background: #fef3c7;
+    }
+
+    .pill-danger {
+        color: #be123c;
+        background: #ffe4e6;
+    }
+
+    .empty-state {
+        padding: 28px;
+        color: #64748b;
+        text-align: center;
+        background: #f8fafc;
+    }
+
+    @media (max-width: 767px) {
+        .dashboard-page {
+            padding: 22px 12px 34px;
+        }
+
+        .dashboard-hero {
+            padding: 22px;
+        }
+
+        .chart-wrap,
+        .chart-wrap.sm {
+            height: 260px;
+        }
+
+        .section-head {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="dashboard-page">
+    <div class="dashboard-shell">
+        <section class="dashboard-hero mb-4">
+            <div class="position-relative" style="z-index: 1;">
+                <div class="d-flex flex-column flex-xl-row align-items-xl-end justify-content-between gap-4">
+                    <div>
+                        <span class="hero-badge mb-3">Business Intelligence</span>
+                        <h1 class="display-6 fw-bold mb-2">Rembeka Beauty Shop Dashboard</h1>
+                        <p class="mb-0 opacity-75">
+                            Sales, profit, stock, product movement, users, and risk alerts in one polished workspace.
+                        </p>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="metric-chip">Today: KSh {{ "%.2f"|format(todays_sales|float) }}</span>
+                        <span class="metric-chip">Stock Value: KSh {{ "%.2f"|format(total_stock_value|float) }}</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="row g-3 mb-4">
+            <div class="col-sm-6 col-xl-3">
+                <div class="dashboard-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="card-icon">S</span>
+                        <span class="status-pill pill-good">Sales</span>
+                    </div>
+                    <p class="metric-label mb-2">Total Sales Tracked</p>
+                    <div class="metric-value">KSh {{ "%.2f"|format(total_sales.value) }}</div>
+                    <p class="text-secondary mb-0 mt-2">Across {{ daily_sales_summary|length }} recorded day{% if daily_sales_summary|length != 1 %}s{% endif %}</p>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="dashboard-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="card-icon">P</span>
+                        <span class="status-pill {% if total_profit.value >= 0 %}pill-good{% else %}pill-danger{% endif %}">Profit</span>
+                    </div>
+                    <p class="metric-label mb-2">Gross Profit</p>
+                    <div class="metric-value">KSh {{ "%.2f"|format(total_profit.value) }}</div>
+                    <p class="text-secondary mb-0 mt-2">From available profit analysis</p>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="dashboard-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="card-icon">I</span>
+                        <span class="status-pill {% if out_of_stock_products|length > 0 %}pill-danger{% else %}pill-good{% endif %}">Stock</span>
+                    </div>
+                    <p class="metric-label mb-2">Inventory Value</p>
+                    <div class="metric-value">KSh {{ "%.2f"|format(total_stock_value|float) }}</div>
+                    <p class="text-secondary mb-0 mt-2">{{ out_of_stock_products|length }} out-of-stock product{% if out_of_stock_products|length != 1 %}s{% endif %}</p>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl-3">
+                <div class="dashboard-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="card-icon">U</span>
+                        <span class="status-pill pill-warn">Activity</span>
+                    </div>
+                    <p class="metric-label mb-2">Items Sold</p>
+                    <div class="metric-value">{{ "%.0f"|format(total_items.value) }}</div>
+                    <p class="text-secondary mb-0 mt-2">{{ active_users|length }} active user{% if active_users|length != 1 %}s{% endif %} in the system</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="row g-4 mb-4">
+            <div class="col-xl-8">
+                <div class="chart-card h-100">
+                    <div class="section-head">
+                        <h2 class="section-title">Sales Performance Trend</h2>
+                        <span class="status-pill pill-good">Daily Summary</span>
+                    </div>
+                    <div class="chart-wrap">
+                        <canvas id="salesTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4">
+                <div class="chart-card h-100">
+                    <div class="section-head">
+                        <h2 class="section-title">Profit Trend</h2>
+                        <span class="status-pill pill-warn">Margin Watch</span>
+                    </div>
+                    <div class="chart-wrap">
+                        <canvas id="profitTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="chart-card h-100">
+                    <div class="section-head">
+                        <h2 class="section-title">Category Sales</h2>
+                        <span class="status-pill pill-good">{{ category_sales|length }} Categories</span>
+                    </div>
+                    <div class="chart-wrap sm">
+                        <canvas id="categorySalesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="chart-card h-100">
+                    <div class="section-head">
+                        <h2 class="section-title">Top Products by Sales</h2>
+                        <span class="status-pill pill-good">Products</span>
+                    </div>
+                    <div class="chart-wrap sm">
+                        <canvas id="productSalesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="row g-4 mb-4">
+            <div class="col-lg-6">
+                <div class="data-card h-100">
+                    <div class="section-head">
+                        <h2 class="section-title">Quick Insights</h2>
+                        <span class="status-pill pill-warn">Overview</span>
+                    </div>
+                    <div class="insight-list">
+                        <div class="insight-item">
+                            <div>
+                                <strong>Best selling product</strong>
+                                <p class="text-secondary mb-0">
+                                    {% if best_selling_product %}{{ best_selling_product[0][1] }}{% else %}No sales yet{% endif %}
+                                </p>
+                            </div>
+                            <strong>{% if best_selling_product %}{{ best_selling_product[0][3] }} sold{% else %}-{% endif %}</strong>
+                        </div>
+                        <div class="insight-item">
+                            <div>
+                                <strong>Slow moving product</strong>
+                                <p class="text-secondary mb-0">
+                                    {% if slow_moving_products %}{{ slow_moving_products[0][1] }}{% else %}No product data{% endif %}
+                                </p>
+                            </div>
+                            <strong>{% if slow_moving_products %}{{ slow_moving_products[0][3] }} sold{% else %}-{% endif %}</strong>
+                        </div>
+                        <div class="insight-item">
+                            <div>
+                                <strong>Below buying price sales</strong>
+                                <p class="text-secondary mb-0">Transactions needing pricing review</p>
+                            </div>
+                            <strong>{{ p_below_buying_price|length }}</strong>
+                        </div>
+                        <div class="insight-item">
+                            <div>
+                                <strong>Monthly periods analyzed</strong>
+                                <p class="text-secondary mb-0">Revenue and profit snapshots</p>
+                            </div>
+                            <strong>{{ monthly_sales_summary|length }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="chart-card h-100">
+                    <div class="section-head">
+                        <h2 class="section-title">Attendant Performance</h2>
+                        <span class="status-pill pill-good">Team Sales</span>
+                    </div>
+                    <div class="chart-wrap sm">
+                        <canvas id="attendantChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="row g-4 mb-4">
+            <div class="col-xl-6">
+                <div class="data-card">
+                    <div class="section-head">
+                        <h2 class="section-title">Profit by Product</h2>
+                        <span class="status-pill pill-good">{{ profit_per_product|length }} Rows</span>
+                    </div>
+                    {% if profit_per_product %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-modern">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Qty</th>
+                                    <th>Sales</th>
+                                    <th>Cost</th>
+                                    <th>Profit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in profit_per_product[:8] %}
+                                <tr>
+                                    <td>{{ item[1] }}</td>
+                                    <td>{{ item[3] }}</td>
+                                    <td>KSh {{ "%.2f"|format(item[4]|float) }}</td>
+                                    <td>KSh {{ "%.2f"|format(item[5]|float) }}</td>
+                                    <td class="fw-bold {% if item[6]|float < 0 %}text-danger{% else %}text-success{% endif %}">KSh {{ "%.2f"|format(item[6]|float) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="empty-state">No product profit analysis available yet.</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="data-card">
+                    <div class="section-head">
+                        <h2 class="section-title">Product Margin Analysis</h2>
+                        <span class="status-pill pill-warn">Pricing</span>
+                    </div>
+                    {% if profit_margin_per_p %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-modern">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Buying</th>
+                                    <th>Selling</th>
+                                    <th>Profit/Unit</th>
+                                    <th>Margin</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in profit_margin_per_p[:8] %}
+                                <tr>
+                                    <td>{{ item[1] }}</td>
+                                    <td>KSh {{ "%.2f"|format(item[3]|float) }}</td>
+                                    <td>KSh {{ "%.2f"|format(item[4]|float) }}</td>
+                                    <td>KSh {{ "%.2f"|format(item[5]|float) }}</td>
+                                    <td><span class="status-pill {% if item[6]|float >= 30 %}pill-good{% elif item[6]|float >= 10 %}pill-warn{% else %}pill-danger{% endif %}">{{ item[6] }}%</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="empty-state">No margin analysis available yet.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <section class="row g-4 mb-4">
+            <div class="col-xl-6">
+                <div class="data-card">
+                    <div class="section-head">
+                        <h2 class="section-title">Category Profit Analysis</h2>
+                        <span class="status-pill pill-good">Profit Centers</span>
+                    </div>
+                    {% if category_profit %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-modern">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Sales</th>
+                                    <th>Cost</th>
+                                    <th>Profit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in category_profit[:8] %}
+                                <tr>
+                                    <td>{{ item[1] }}</td>
+                                    <td>KSh {{ "%.2f"|format(item[2]|float) }}</td>
+                                    <td>KSh {{ "%.2f"|format(item[3]|float) }}</td>
+                                    <td class="fw-bold {% if item[4]|float < 0 %}text-danger{% else %}text-success{% endif %}">KSh {{ "%.2f"|format(item[4]|float) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="empty-state">No category profit analysis available yet.</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="data-card">
+                    <div class="section-head">
+                        <h2 class="section-title">Monthly Sales Summary</h2>
+                        <span class="status-pill pill-good">Revenue</span>
+                    </div>
+                    {% if monthly_sales_summary %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-modern">
+                            <thead>
+                                <tr>
+                                    <th>Year</th>
+                                    <th>Month</th>
+                                    <th>Items</th>
+                                    <th>Sales</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in monthly_sales_summary[:8] %}
+                                <tr>
+                                    <td>{{ item[0] }}</td>
+                                    <td>{{ item[1] }}</td>
+                                    <td>{{ item[2] }}</td>
+                                    <td class="fw-bold">KSh {{ "%.2f"|format(item[3]|float) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="empty-state">No monthly sales summary available yet.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <section class="row g-4">
+            <div class="col-xl-4">
+                <div class="data-card h-100">
+                    <div class="section-head">
+                        <h2 class="section-title">Stock Alerts</h2>
+                        <span class="status-pill {% if out_of_stock_products|length > 0 %}pill-danger{% else %}pill-good{% endif %}">{{ out_of_stock_products|length }} Alerts</span>
+                    </div>
+                    {% if out_of_stock_products %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-modern">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Spec</th>
+                                    <th>Stock</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in out_of_stock_products[:8] %}
+                                <tr>
+                                    <td>{{ item[1] }}</td>
+                                    <td>{{ item[2] }}</td>
+                                    <td><span class="status-pill pill-danger">{{ item[3] }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="empty-state">No out-of-stock products found.</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-xl-4">
+                <div class="data-card h-100">
+                    <div class="section-head">
+                        <h2 class="section-title">Sales Below Buying Price</h2>
+                        <span class="status-pill {% if p_below_buying_price|length > 0 %}pill-danger{% else %}pill-good{% endif %}">Risk Review</span>
+                    </div>
+                    {% if p_below_buying_price %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-modern">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Buying</th>
+                                    <th>Selling</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in p_below_buying_price[:8] %}
+                                <tr>
+                                    <td>{{ item[2] }}</td>
+                                    <td>KSh {{ "%.2f"|format(item[5]|float) }}</td>
+                                    <td class="text-danger fw-bold">KSh {{ "%.2f"|format(item[6]|float) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="empty-state">No below-cost sales found.</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-xl-4">
+                <div class="data-card h-100">
+                    <div class="section-head">
+                        <h2 class="section-title">Recent Stock Movement</h2>
+                        <span class="status-pill pill-warn">Inventory Flow</span>
+                    </div>
+                    {% if stock_movement_report %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-modern">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Type</th>
+                                    <th>Qty</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in stock_movement_report[:8] %}
+                                <tr>
+                                    <td>{{ item[0] }}</td>
+                                    <td><span class="status-pill {% if item[1] == 'Stock In' %}pill-good{% else %}pill-warn{% endif %}">{{ item[1] }}</span></td>
+                                    <td>{{ item[2] }}</td>
+                                    <td>{{ item[3] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="empty-state">No stock movement available yet.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const chartFont = "'Inter', 'Segoe UI', sans-serif";
+    Chart.defaults.font.family = chartFont;
+    Chart.defaults.color = '#64748b';
+
+    const currency = value => 'KSh ' + Number(value || 0).toLocaleString(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    });
+
+    const makeGradient = (ctx, colorOne, colorTwo) => {
+        const gradient = ctx.createLinearGradient(0, 0, 0, 320);
+        gradient.addColorStop(0, colorOne);
+        gradient.addColorStop(1, colorTwo);
+        return gradient;
+    };
+
+    const salesLabels = [{% for item in daily_sales_summary|reverse %}{{ item[0]|string|tojson }}{% if not loop.last %},{% endif %}{% endfor %}];
+    const salesValues = [{% for item in daily_sales_summary|reverse %}{{ item[2]|float }}{% if not loop.last %},{% endif %}{% endfor %}];
+    const profitLabels = [{% for item in profit_per_day|reverse %}{{ item[0]|string|tojson }}{% if not loop.last %},{% endif %}{% endfor %}];
+    const profitValues = [{% for item in profit_per_day|reverse %}{{ item[3]|float }}{% if not loop.last %},{% endif %}{% endfor %}];
+    const categoryLabels = [{% for item in category_sales[:8] %}{{ item[1]|string|tojson }}{% if not loop.last %},{% endif %}{% endfor %}];
+    const categoryValues = [{% for item in category_sales[:8] %}{{ item[3]|float }}{% if not loop.last %},{% endif %}{% endfor %}];
+    const productLabels = [{% for item in sales_by_product[:8] %}{{ item[1]|string|tojson }}{% if not loop.last %},{% endif %}{% endfor %}];
+    const productValues = [{% for item in sales_by_product[:8] %}{{ item[4]|float }}{% if not loop.last %},{% endif %}{% endfor %}];
+    const attendantLabels = [{% for item in sales_by_attendant[:8] %}{{ item[1]|string|tojson }}{% if not loop.last %},{% endif %}{% endfor %}];
+    const attendantValues = [{% for item in sales_by_attendant[:8] %}{{ item[4]|float }}{% if not loop.last %},{% endif %}{% endfor %}];
+
+    function renderEmptyChart(canvasId, message) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        ctx.font = '600 16px Segoe UI';
+        ctx.fillStyle = '#94a3b8';
+        ctx.textAlign = 'center';
+        ctx.fillText(message, canvas.width / 2, canvas.height / 2);
+    }
+
+    function lineChart(canvasId, labels, values, label, color) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas || !labels.length) {
+            renderEmptyChart(canvasId, 'No chart data yet');
+            return;
+        }
+        const ctx = canvas.getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label,
+                    data: values,
+                    borderColor: color,
+                    backgroundColor: makeGradient(ctx, color.replace('1)', '0.24)'), color.replace('1)', '0.02)')),
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#fff',
+                    pointBorderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: context => `${label}: ${currency(context.parsed.y)}` } }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { beginAtZero: true, ticks: { callback: currency }, grid: { color: 'rgba(148, 163, 184, 0.18)' } }
+                }
+            }
+        });
+    }
+
+    function barChart(canvasId, labels, values, label, horizontal = false) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas || !labels.length) {
+            renderEmptyChart(canvasId, 'No chart data yet');
+            return;
+        }
+        const ctx = canvas.getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    label,
+                    data: values,
+                    borderRadius: 10,
+                    backgroundColor: makeGradient(ctx, 'rgba(190, 24, 93, 0.88)', 'rgba(79, 70, 229, 0.72)'),
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                indexAxis: horizontal ? 'y' : 'x',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: context => `${label}: ${currency(context.parsed.y ?? context.parsed.x)}` } }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true } },
+                    y: { beginAtZero: true, grid: { color: 'rgba(148, 163, 184, 0.18)' }, ticks: { callback: horizontal ? value => labels[value] : currency } }
+                }
+            }
+        });
+    }
+
+    lineChart('salesTrendChart', salesLabels, salesValues, 'Sales', 'rgba(190, 24, 93, 1)');
+    lineChart('profitTrendChart', profitLabels, profitValues, 'Profit', 'rgba(79, 70, 229, 1)');
+    barChart('categorySalesChart', categoryLabels, categoryValues, 'Category Sales');
+    barChart('productSalesChart', productLabels, productValues, 'Product Sales', true);
+    barChart('attendantChart', attendantLabels, attendantValues, 'Attendant Sales', true);
+</script>
+
+{% endblock %}
