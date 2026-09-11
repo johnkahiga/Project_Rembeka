@@ -1,6 +1,20 @@
+import os
+
 import psycopg2
 
-conn = psycopg2.connect(host='localhost',port=5432,user='postgres',password='1234',dbname='rembeka_beauty_shop')
+
+database_url = os.getenv("DATABASE_URL")
+
+if database_url:
+    conn = psycopg2.connect(database_url)
+else:
+    conn = psycopg2.connect(
+        host=os.getenv("DB_HOST", "localhost"),
+        port=os.getenv("DB_PORT", "5432"),
+        user=os.getenv("DB_USER", "postgres"),
+        password=os.getenv("DB_PASSWORD", "1234"),
+        dbname=os.getenv("DB_NAME", "rembeka_beauty_shop"),
+    )
 cur = conn.cursor()
 
 def get_products():

@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, render_template,request,redirect,url_for,flash,session
 from database import get_products,get_categories,get_expenses,get_sales,get_users,get_stock_purchases,insert_products,insert_sales,insert_categories,insert_expenses,insert_stock_purchases,check_available_stock,check_user_exists,create_user,get_daily_sales_summary,get_monthly_sales_summary,get_best_selling_products,get_category_profit_analysis,get_category_sales_analysis,get_out_of_stock_products,get_products_sold_below_buying_price,get_profit_margin_per_product,get_profit_per_day,get_profit_per_month,get_profit_per_product,get_profit_per_year,get_sales_by_attendant,get_sales_by_product,get_slow_moving_products,get_stock_movement_report,get_todays_sales,get_total_stock_value,get_yearly_sales_summary
 from flask_bcrypt import Bcrypt
@@ -9,7 +11,7 @@ app = Flask(__name__)
 bcrypt = Bcrypt(app)
 
 
-app.secret_key = 'fhgjhngugndfgkutrgj'
+app.secret_key = os.getenv('SECRET_KEY', 'fhgjhngugndfgkutrgj')
 
 @app.route('/')
 def home():
@@ -228,4 +230,5 @@ def logout():
 
 
 
-app.run(debug=True)
+if __name__ == "__main__":
+    app.run(debug=True)
