@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import psycopg2
 
@@ -16,6 +17,16 @@ else:
         dbname=os.getenv("DB_NAME", "rembeka_beauty_shop"),
     )
 cur = conn.cursor()
+
+
+def initialize_database():
+    schema_path = Path(__file__).with_name("schema.sql")
+    with schema_path.open(encoding="utf-8") as schema_file:
+        cur.execute(schema_file.read())
+    conn.commit()
+
+
+initialize_database()
 
 def get_products():
     cur.execute("select * from products")
