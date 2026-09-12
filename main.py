@@ -1,12 +1,15 @@
 import os
+from decimal import Decimal, InvalidOperation
 
+import psycopg2
 from flask import Flask, render_template,request,redirect,url_for,flash,session,abort
-from database import get_product,update_product,get_products,get_categories,get_expenses,get_sales,get_users,get_stock_purchases,insert_products,insert_sales,insert_categories,insert_expenses,insert_stock_purchases,check_available_stock,check_user_exists,create_user,get_daily_sales_summary,get_monthly_sales_summary,get_best_selling_products,get_category_profit_analysis,get_category_sales_analysis,get_out_of_stock_products,get_products_sold_below_buying_price,get_profit_margin_per_product,get_profit_per_day,get_profit_per_month,get_profit_per_product,get_profit_per_year,get_sales_by_attendant,get_sales_by_product,get_slow_moving_products,get_stock_movement_report,get_todays_sales,get_total_stock_value,get_yearly_sales_summary
+from database import init_app as init_database, rollback_database, get_product,update_product,get_products,get_categories,get_expenses,get_sales,get_users,get_stock_purchases,insert_products,insert_sales,insert_categories,insert_expenses,insert_stock_purchases,check_available_stock,check_user_exists,create_user,get_daily_sales_summary,get_monthly_sales_summary,get_best_selling_products,get_category_profit_analysis,get_category_sales_analysis,get_out_of_stock_products,get_products_sold_below_buying_price,get_profit_margin_per_product,get_profit_per_day,get_profit_per_month,get_profit_per_product,get_profit_per_year,get_sales_by_attendant,get_sales_by_product,get_slow_moving_products,get_stock_movement_report,get_todays_sales,get_total_stock_value,get_yearly_sales_summary
 from flask_bcrypt import Bcrypt
 from functools import wraps 
 
 
 app = Flask(__name__)
+init_database(app)
 
 bcrypt = Bcrypt(app)
 
@@ -55,24 +58,43 @@ def edit_product(product_id):
     product = get_product(product_id)
     if product is None:
         abort(404)
+    categories = get_categories()
 
     if request.method == 'POST':
+        try:
+            buying_price = Decimal(request.form['b_price'])
+            selling_price = Decimal(request.form['s_price'])
+            quantity = Decimal(request.form['q_added'])
+            category_id = int(request.form['c_id'])
+        except (InvalidOperation, ValueError, KeyError):
+            flash('Enter valid product values', 'danger')
+            return render_template('edit_product.html', product=product, categories=categories), 400
+
+        if buying_price < 0 or selling_price < 0 or quantity < 0:
+            flash('Prices and quantity cannot be negative', 'danger')
+            return render_template('edit_product.html', product=product, categories=categories), 400
+
         values = (
-            request.form['c_id'],
+            category_id,
             request.form['p_name'].strip(),
             request.form['spec'].strip(),
-            request.form['b_price'],
-            request.form['s_price'],
-            request.form['q_added'],
+            buying_price,
+            selling_price,
+            quantity,
         )
         if not values[1]:
             flash('Product name is required', 'danger')
         else:
-            update_product(product_id, values)
+            try:
+                update_product(product_id, values)
+            except psycopg2.Error:
+                rollback_database()
+                flash('The product could not be updated. Please check the values and try again.', 'danger')
+                return render_template('edit_product.html', product=product, categories=categories), 400
             flash('Product updated successfully', 'success')
             return redirect(url_for('products'))
 
-    return render_template('edit_product.html', product=product, categories=get_categories())
+    return render_template('edit_product.html', product=product, categories=categories)
 
 
 @app.route('/stockpurchases')

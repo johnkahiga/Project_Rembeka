@@ -2,31 +2,75 @@ import os
 from pathlib import Path
 
 import psycopg2
+from flask import g
 
 
-database_url = os.getenv("DATABASE_URL")
-
-if database_url:
-    conn = psycopg2.connect(database_url)
-else:
-    conn = psycopg2.connect(
+def _connect():
+    database_url = os.getenv("DATABASE_URL")
+    if database_url:
+        return psycopg2.connect(database_url)
+    return psycopg2.connect(
         host=os.getenv("DB_HOST", "localhost"),
         port=os.getenv("DB_PORT", "5432"),
         user=os.getenv("DB_USER", "postgres"),
         password=os.getenv("DB_PASSWORD", "1234"),
         dbname=os.getenv("DB_NAME", "rembeka_beauty_shop"),
     )
-cur = conn.cursor()
+
+
+def get_db():
+    if "db" not in g:
+        g.db = _connect()
+        g.db_cursor = g.db.cursor()
+    return g.db
+
+
+def close_db(_error=None):
+    cursor = g.pop("db_cursor", None)
+    connection = g.pop("db", None)
+    if cursor is not None:
+        cursor.close()
+    if connection is not None:
+        if _error is not None:
+            connection.rollback()
+        connection.close()
+
+
+def rollback_database():
+    if "db" in g:
+        g.db.rollback()
+
+
+class _CursorProxy:
+    def __getattr__(self, name):
+        get_db()
+        return getattr(g.db_cursor, name)
+
+
+class _ConnectionProxy:
+    def __getattr__(self, name):
+        return getattr(get_db(), name)
+
+
+cur = _CursorProxy()
+conn = _ConnectionProxy()
 
 
 def initialize_database():
     schema_path = Path(__file__).with_name("schema.sql")
-    with schema_path.open(encoding="utf-8") as schema_file:
-        cur.execute(schema_file.read())
-    conn.commit()
+    connection = _connect()
+    try:
+        with connection.cursor() as cursor:
+            with schema_path.open(encoding="utf-8") as schema_file:
+                cursor.execute(schema_file.read())
+        connection.commit()
+    finally:
+        connection.close()
 
 
-initialize_database()
+def init_app(app):
+    initialize_database()
+    app.teardown_appcontext(close_db)
 
 def get_products():
     cur.execute("select * from products")
