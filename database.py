@@ -33,6 +33,24 @@ def get_products():
     products_data = cur.fetchall()
     return products_data
 
+def get_product(product_id):
+    cur.execute("select * from products where product_id = %s", (product_id,))
+    return cur.fetchone()
+
+def update_product(product_id, values):
+    cur.execute("""
+        UPDATE products
+        SET category_id = %s,
+            product_name = %s,
+            specification = %s,
+            buying_price = %s,
+            selling_price = %s,
+            stock_quantity = %s
+        WHERE product_id = %s
+    """, (*values, product_id))
+    conn.commit()
+    return cur.rowcount > 0
+
 def get_sales():
     cur.execute("select * from sales")
     sales_data = cur.fetchall()

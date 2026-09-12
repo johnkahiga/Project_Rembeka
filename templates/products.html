@@ -154,6 +154,7 @@
                             <th>Buying Price</th>
                             <th>Selling Price</th>
                             <th>Quantity Added </th>
+                            <th>Actions</th>
 
                         </tr>
                     </thead>
@@ -167,6 +168,7 @@
                             <td> {{ i[4] }}</td>
                             <td> {{ i[5] }}</td>
                             <td> {{ i[6] }}</td>
+                            <td><a class="btn btn-sm btn-outline-primary" href="{{ url_for('edit_product', product_id=i[0]) }}">Edit</a></td>
                         </tr>
                         {% endfor %}
                     </tbody>

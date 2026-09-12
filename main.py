@@ -1,7 +1,7 @@
 import os
 
-from flask import Flask, render_template,request,redirect,url_for,flash,session
-from database import get_products,get_categories,get_expenses,get_sales,get_users,get_stock_purchases,insert_products,insert_sales,insert_categories,insert_expenses,insert_stock_purchases,check_available_stock,check_user_exists,create_user,get_daily_sales_summary,get_monthly_sales_summary,get_best_selling_products,get_category_profit_analysis,get_category_sales_analysis,get_out_of_stock_products,get_products_sold_below_buying_price,get_profit_margin_per_product,get_profit_per_day,get_profit_per_month,get_profit_per_product,get_profit_per_year,get_sales_by_attendant,get_sales_by_product,get_slow_moving_products,get_stock_movement_report,get_todays_sales,get_total_stock_value,get_yearly_sales_summary
+from flask import Flask, render_template,request,redirect,url_for,flash,session,abort
+from database import get_product,update_product,get_products,get_categories,get_expenses,get_sales,get_users,get_stock_purchases,insert_products,insert_sales,insert_categories,insert_expenses,insert_stock_purchases,check_available_stock,check_user_exists,create_user,get_daily_sales_summary,get_monthly_sales_summary,get_best_selling_products,get_category_profit_analysis,get_category_sales_analysis,get_out_of_stock_products,get_products_sold_below_buying_price,get_profit_margin_per_product,get_profit_per_day,get_profit_per_month,get_profit_per_product,get_profit_per_year,get_sales_by_attendant,get_sales_by_product,get_slow_moving_products,get_stock_movement_report,get_todays_sales,get_total_stock_value,get_yearly_sales_summary
 from flask_bcrypt import Bcrypt
 from functools import wraps 
 
@@ -48,6 +48,31 @@ def add_products():
         flash("Product added successfully",'success') 
 
     return redirect(url_for('products'))
+
+@app.route('/products/<int:product_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_product(product_id):
+    product = get_product(product_id)
+    if product is None:
+        abort(404)
+
+    if request.method == 'POST':
+        values = (
+            request.form['c_id'],
+            request.form['p_name'].strip(),
+            request.form['spec'].strip(),
+            request.form['b_price'],
+            request.form['s_price'],
+            request.form['q_added'],
+        )
+        if not values[1]:
+            flash('Product name is required', 'danger')
+        else:
+            update_product(product_id, values)
+            flash('Product updated successfully', 'success')
+            return redirect(url_for('products'))
+
+    return render_template('edit_product.html', product=product, categories=get_categories())
 
 
 @app.route('/stockpurchases')
