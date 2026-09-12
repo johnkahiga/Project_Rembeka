@@ -33,6 +33,7 @@ def products():
     return render_template("products.html",product_data=product_data,categories=categories)
 
 @app.route('/add_products',methods=['GET','POST'])
+@login_required
 def add_products():
     if request.method == 'POST':
         category_id = request.form['c_id']
@@ -58,10 +59,11 @@ def stockpurchases():
     return render_template("stockpurchases.html",products=products,stock=stock,users=users)
 
 @app.route('/add_stock',methods=['GET','POST'])
+@login_required
 def add_stock():
     if request.method == 'POST':
         pid = request.form['pid']
-        uid=request.form['uid']
+        uid = check_user_exists(session['email'])[0]
         quantity_added= request.form['quantity']
         total_cost=request.form['t_cost']
 
@@ -84,10 +86,11 @@ def sales():
     return render_template('sales.html',sales_data=sales_data,products=products,users=users)
 
 @app.route('/make_sale',methods=['GET','POST'])
+@login_required
 def make_sale():
     if request.method == 'POST':
         pid = request.form['pid']
-        uid=request.form['uid']
+        uid = check_user_exists(session['email'])[0]
         quantity_sold= request.form['quantity']
         s_price=request.form['price']
 
@@ -112,9 +115,10 @@ def expenses():
 
 
 @app.route('/add_expense',methods=['GET','POST'])
+@login_required
 def add_expense():
     if request.method == 'POST':
-        user_id=request.form['uid']
+        user_id = check_user_exists(session['email'])[0]
         expense_n=request.form['expense']
         amount=request.form['amount']
         description=request.form['desc']
@@ -133,6 +137,7 @@ def categories():
     return render_template("categories.html",categories=categories)
 
 @app.route('/add_category',methods=['GET','POST'])
+@login_required
 def add_category():
     if request.method == 'POST':
         category_name=request.form['cid']

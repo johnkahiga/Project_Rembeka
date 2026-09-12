@@ -96,10 +96,10 @@
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-4">
-                        <form action="/add_products" method="post">
+                        <form action="{{ url_for('add_products') }}" method="post">
                             <div class="mb-3">
                                 <select class="form-select" aria-label="Default select example" name="c_id">
-                                    <option selected>Select a Category</option>
+                                    <option value="" selected disabled>Select a Category</option>
                                     {% for category in categories %}
                                     <option value="{{ category[0] }}">{{ category[1] }}</option>
                                     {% endfor %}
@@ -107,24 +107,24 @@
                             </div>
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Product Name</label>
-                                <input type="text" name="p_name" class="form-control" id="exampleInputPassword1">
+                                <input type="text" name="p_name" required class="form-control" id="productName">
                             </div>
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Specification</label>
-                                <input type="text" name="spec" class="form-control" id="exampleInputPassword1">
+                                <input type="text" name="spec" class="form-control" id="productSpecification">
                             </div>
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Buying Price</label>
-                                <input type="number" name="b_price" class="form-control" id="exampleInputPassword1">
+                                <input type="number" name="b_price" min="0" step="0.01" required class="form-control" id="buyingPrice">
                             </div>
 
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Selling Price</label>
-                                <input type="number" name="s_price" class="form-control" id="exampleInputPassword1">
+                                <input type="number" name="s_price" min="0" step="0.01" required class="form-control" id="sellingPrice">
                             </div>
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Quantit Added</label>
-                                <input type="number" name="q_added" class="form-control" id="exampleInputPassword1">
+                                <input type="number" name="q_added" min="0" step="0.01" required class="form-control" id="initialQuantity">
                             </div>
 
                             <div class="modal-footer px-0 pb-0">

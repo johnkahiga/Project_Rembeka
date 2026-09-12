@@ -92,19 +92,19 @@
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-4">
-                        <form action="/add_exepense" method="post">
+                        <form action="{{ url_for('add_expense') }}" method="post">
                            
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Expense  Name</label>
-                                <input type="text" name="expense" class="form-control" id="exampleInputPassword1">
+                                <input type="text" name="expense" required class="form-control" id="expenseName">
                             </div>
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Amount</label>
-                                <input type="number" name="amount" class="form-control" id="exampleInputPassword1">
+                                <input type="number" name="amount" min="0" step="0.01" required class="form-control" id="expenseAmount">
                             </div>
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Description</label>
-                                <input type="text" name="desc" class="form-control" id="exampleInputPassword1">
+                                <input type="text" name="desc" class="form-control" id="expenseDescription">
                             </div>
 
                             <div class="modal-footer px-0 pb-0">

@@ -92,13 +92,17 @@ def insert_expenses(values):
     conn.commit()
 
 def check_available_stock(product_id):
+    cur.execute("select stock_quantity from products where product_id = %s", (product_id,))
+    product = cur.fetchone()
+    initial_stock = product[0] if product else 0
+
     cur.execute("select sum(stock_purchases.quantity_added) from stock_purchases where product_id = %s",(product_id,))
     total_stock = cur.fetchone()[0] or 0
 
     cur.execute("select sum(sales.quantity_sold) from sales where product_id = %s",(product_id,))
     total_sold = cur.fetchone()[0] or 0
 
-    return total_stock - total_sold
+    return initial_stock + total_stock - total_sold
 
 
 # def get_active_users():
@@ -231,7 +235,7 @@ def get_out_of_stock_products():
             p.product_id,
             p.product_name,
             p.specification,
-            COALESCE(st.total_stock_added, 0) - COALESCE(sa.total_sold, 0) AS available_stock
+            p.stock_quantity + COALESCE(st.total_stock_added, 0) - COALESCE(sa.total_sold, 0) AS available_stock
         FROM products p
         LEFT JOIN (
             SELECT product_id, SUM(quantity_added) AS total_stock_added
@@ -243,7 +247,7 @@ def get_out_of_stock_products():
             FROM sales
             GROUP BY product_id
         ) sa ON p.product_id = sa.product_id
-        WHERE COALESCE(st.total_stock_added, 0) - COALESCE(sa.total_sold, 0) <= 0
+        WHERE p.stock_quantity + COALESCE(st.total_stock_added, 0) - COALESCE(sa.total_sold, 0) <= 0
         ORDER BY p.product_name
     """)
     return cur.fetchall()
@@ -258,7 +262,7 @@ def get_total_stock_value():
             SELECT 
                 p.product_id,
                 p.buying_price,
-                COALESCE(st.total_stock_added, 0) - COALESCE(sa.total_sold, 0) AS available_stock
+                p.stock_quantity + COALESCE(st.total_stock_added, 0) - COALESCE(sa.total_sold, 0) AS available_stock
             FROM products p
             LEFT JOIN (
                 SELECT product_id, SUM(quantity_added) AS total_stock_added
@@ -298,7 +302,7 @@ def get_daily_sales_summary():
         ORDER BY sale_day DESC
     """)
     daily_sales_summary=cur.fetchall()
-    return cur.fetchall()
+    return daily_sales_summary
 
 
 
